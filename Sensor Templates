@@ -1,0 +1,63 @@
+template:
+  - sensor: 
+      - name: "MichiganBasketballStartTime" ### Get the start time
+        state: >
+              {% set starttime = as_timestamp(strptime(state_attr("calendar.ncaam_big_ten_conference_michigan_wolverines", "start_time"),'%Y-%m-%d %H:%M:%S')) | timestamp_custom("%A @ %-I:%M %p") %}
+              {{ starttime }}
+      - name: "MichiganBasketballEndTime" ### Get the end time
+        state: >
+              {% set endtime = as_timestamp(strptime(state_attr("calendar.ncaam_big_ten_conference_michigan_wolverines", "end_time"),'%Y-%m-%d %H:%M:%S')) | timestamp_custom("%A @ %-I:%M %p") %}
+              {{ endtime }} 
+      - name: "MichiganBasketballTV" ### Get tv channel
+        state: >
+              {% set tv = state_attr("calendar.ncaam_big_ten_conference_michigan_wolverines", "location") %}
+              {{ tv }}
+      - name: "MichiganBasketballGameLinkWatch"
+        state: >
+              {% set tvlink = state_attr("calendar.ncaam_big_ten_conference_michigan_wolverines", "description") %}
+              {{ tvlink.split()[12] }}
+      - name: "MichiganBasketballGameLinkUpdates"
+        state: >
+              {% set tvlink = state_attr("calendar.ncaam_big_ten_conference_michigan_wolverines", "description") %}
+              {{ tvlink.split()[20] }}
+      
+      - name: "MichiganBasketBallLocation"
+        state: >
+              {% set msg = state_attr("calendar.ncaam_big_ten_conference_michigan_wolverines", "message") %}
+              {% set team1 = "Michigan Wolverines" %}
+              {% if msg.index(team1) == 0 %}
+                  Away
+              {% else %}
+                  Home
+              {% endif %}
+     - name: "MichiganBasketBallOPSchool"
+        state: >
+              {% set msg = state_attr("calendar.ncaam_big_ten_conference_michigan_wolverines", "message") %}
+              {% set team1 = "Michigan Wolverines" %}
+              {% if msg.index(team1) == 0 %}
+              {% set team2 = msg.split(" @ ")[1] %}
+              {% set i = team2.split(" ") | count %}
+              {% if i >= 3 %}
+                {% set school1 = team2.split(" ")[i-1]  %}
+                {% set school2 = team2.split(" ")[i-2]  %}
+                {{ team2 | replace(school1,"") | replace(school2,"") }}
+              {% else %}
+                {% set school1 = team2.split(" ")[i-1]  %}
+                {% set school2 = team2.split(" ")[i-2]  %}
+                {{ team2 | replace(school1,"") }}
+              {% endif %}
+              {% else %}
+              {% set team2 = msg.split(" @ ")[0] %}
+              {% set i = team2.split(" ") | count %}
+              {% if i >= 2 %}
+                {% set school1 = team2.split(" ")[0]  %}
+                {% set school2 = team2.split(" ")[i-2]  %}
+                {% set school3 = team2.split(" ")[i]  %}
+                {{ school1 }} {{ school2 }}                      
+              {% else %}
+                {% set school1 = team2.split(" ")[i-1]  %}
+                {% set school2 = team2.split(" ")[i-2]  %}
+                {{ team2 }} {{ school2 }}
+              {% endif %}
+              {% endif %}
+      
