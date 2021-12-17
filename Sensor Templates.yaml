@@ -12,16 +12,32 @@ template:
         state: >
               {% set tv = state_attr("calendar.ncaam_big_ten_conference_michigan_wolverines", "location") %}
               {{ tv }}
-      - name: "MichiganBasketballGameLinkWatch"
+      - name: "MichiganBasketballChannel" ### get tv channel number. For this to work you must have entered your provider informtion when setting up the calendar
         state: >
-              {% set tvlink = state_attr("calendar.ncaam_big_ten_conference_michigan_wolverines", "description") %}
-              {{ tvlink.split()[12] }}
-      - name: "MichiganBasketballGameLinkUpdates"
+              {% set tvchannel = state_attr("calendar.ncaam_big_ten_conference_michigan_wolverines", "location") %}
+              {{ tvchannel.split('(')[1].replace(')','').replace('Ch','') }}
+      - name: "MichiganBasketballGameLinkWatch" ### link to watch the game
         state: >
-              {% set tvlink = state_attr("calendar.ncaam_big_ten_conference_michigan_wolverines", "description") %}
-              {{ tvlink.split()[20] }}
-      
-      - name: "MichiganBasketBallLocation"
+              {% set station = state_attr("calendar.ncaam_big_ten_conference_michigan_wolverines", "location").split()[2] %}
+              {% set tvlink = state_attr("calendar.ncaam_big_ten_conference_michigan_wolverines", "description").split(":") %}
+              {% if station == "ESPN" or station == "ESPN2" %}
+                {{- [tvlink[0].split("!")[1],tvlink[1].split()[0]]|join(':') -}} 
+                {% else %}
+                  {{station }} {{ state_attr("calendar.ncaam_big_ten_conference_michigan_wolverines", "location").split('(')[1].replace(')','') }}
+              {% endif %}
+      - name: "MichiganBasketballGameLinkUpdates" ### link for game updates
+        state: >
+              {% set station = state_attr("calendar.ncaam_big_ten_conference_michigan_wolverines", "location").split()[2] %}
+              {% set tvlink = state_attr("calendar.ncaam_big_ten_conference_michigan_wolverines", "description").split(':') %}
+                {% if station == "ESPN" or station == "ESPN2" %}
+                  {{- [tvlink[0].split("!")[1],tvlink[1].split()[0]]|join(':') -}} 
+                  {% set updatelink = ['http:',tvlink[3].split()[0]]| join() %}
+                  {{ updatelink }}
+                {% else %}
+                  {% set updatelink = ['http:',tvlink[2].split()[0]]| join() %}
+                  {{ updatelink }}
+              {% endif %}
+      - name: "MichiganBasketBallLocation" ### Home or Away
         state: >
               {% set msg = state_attr("calendar.ncaam_big_ten_conference_michigan_wolverines", "message") %}
               {% set team1 = "Michigan Wolverines" %}
@@ -30,7 +46,7 @@ template:
               {% else %}
                   Home
               {% endif %}
-     - name: "MichiganBasketBallOPSchool"
+     - name: "MichiganBasketBallOPSchool" ### get the opponets school name
         state: >
               {% set msg = state_attr("calendar.ncaam_big_ten_conference_michigan_wolverines", "message") %}
               {% set team1 = "Michigan Wolverines" %}
